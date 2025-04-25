@@ -47,10 +47,17 @@ yolo detect predict \
   source=data/valid/images/IMG_20230720_092528_jpg.rf.980701a2b73a08ffa62ef76bdfb47d6e.jpg
 ```
 
+### Exporting
+
+```bash
+yolo export \
+  model=weights/yolov8n-four-leaf.pt \
+  format=onnx
+```
+
 
 ## To Do
 
 - [ ] Expand the dataset - see [FLC Dataset](https://biomedicalcomputervision.uniandes.edu.co/publications/finding-four-leaf-clovers-a-benchmark-for-fine-grained-object-localization/).
-- [ ] Quantize the model for use in the browser.
 - [ ] Convert to ONNX/TensorFlow.
 - [ ] [Serve with `tensorflow.js`](https://github.com/Hyuto/yolov8-tfjs)
