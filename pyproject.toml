@@ -16,7 +16,8 @@ readme      = ".github/README.md"
 license     = "MIT"
 
 dependencies = [
-  "ultralytics"
+  "ultralytics",
+  "label-studio",
 ]
 
 
