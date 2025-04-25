@@ -43,8 +43,8 @@ fly-benchmark \
 ```bash
 # Use ultralytics for now
 yolo detect predict \
-model=runs/detect/train8/weights/best.pt \
-source=data/valid/images/IMG_20230720_092528_jpg.rf.980701a2b73a08ffa62ef76bdfb47d6e.jpg
+  model=weights/yolov8n-four-leaf.pt \
+  source=data/valid/images/IMG_20230720_092528_jpg.rf.980701a2b73a08ffa62ef76bdfb47d6e.jpg
 ```
 
 
