@@ -21,13 +21,21 @@ pip install -e .
 ### Training
 
 ```bash
-fly-train
+fly-train \
+  --model weights/yolov8n.pt \
+  --data data.yaml \
+  --img 640 \
+  --batch 16 \
+  --epochs 50 \
+  --device 0
 ```
 
 ### Benchmarking
 
 ```bash
-fly-benchmark --model weights/yolov8n-epoch45.pt --dataset data.yaml
+fly-benchmark \
+  --model weights/yolov8n-epoch45.pt \
+  --dataset data.yaml
 ```
 
 ### Object Detection
@@ -42,7 +50,7 @@ source=data/valid/images/IMG_20230720_092528_jpg.rf.980701a2b73a08ffa62ef76bdfb4
 
 ## To Do
 
-- [ ] Create a more robust dataset - see [FLC Dataset](https://biomedicalcomputervision.uniandes.edu.co/publications/finding-four-leaf-clovers-a-benchmark-for-fine-grained-object-localization/).
+- [ ] Expand the dataset - see [FLC Dataset](https://biomedicalcomputervision.uniandes.edu.co/publications/finding-four-leaf-clovers-a-benchmark-for-fine-grained-object-localization/).
 - [ ] Quantize the model for use in the browser.
-- [ ] Convert to ONNX/TensorFlow
+- [ ] Convert to ONNX/TensorFlow.
 - [ ] [Serve with `tensorflow.js`](https://github.com/Hyuto/yolov8-tfjs)
