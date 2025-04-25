@@ -1,6 +1,6 @@
 # 4 Leaf YOLO - WIP
 
-Training YOLO to detect 4 leaf colvers in the browser.
+Training [YOLO](https://docs.ultralytics.com/models/yolov8/#how-do-i-train-a-yolov8-model) to detect 4 leaf colvers in the browser.
 
 ## Example
 
@@ -22,6 +22,12 @@ pip install -e .
 
 ```bash
 fly-train
+```
+
+### Benchmarking
+
+```bash
+fly-benchmark --model weights/yolov8n-epoch45.pt --dataset data.yaml
 ```
 
 ### Object Detection
