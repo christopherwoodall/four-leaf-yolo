@@ -34,7 +34,7 @@ fly-train \
 
 ```bash
 fly-benchmark \
-  --model weights/yolov8n-best.pt \
+  --model weights/yolov8n-four-leaf.pt \
   --dataset data.yaml
 ```
 
