@@ -4,7 +4,7 @@ Training [YOLO](https://docs.ultralytics.com/models/yolov8/#how-do-i-train-a-yol
 
 ## Example
 
-![prediction](assets/prediction-2.png)
+![prediction](assets/prediction-2.jpg)
 
 ## Usage
 
