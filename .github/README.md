@@ -15,7 +15,7 @@ You will need to grab the dataset from Adam on Roboflow [here](https://universe.
 ```bash
 venv .venv
 source .venv/bin/activate
-pip install -r yolov9/requirements.txt
+pip install -e .
 ```
 
 ### Training
