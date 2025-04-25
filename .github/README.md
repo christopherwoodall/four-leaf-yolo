@@ -2,9 +2,9 @@
 
 Training YOLO to detect 4 leaf colvers in the browser.
 
-## Examples
+## Example
 
-![features](assets/stage0_Conv_features.png)
+![prediction](assets/prediction-2.png)
 
 ## Usage
 
@@ -27,7 +27,10 @@ fly-train
 ### Object Detection
 
 ```bash
-fly-detect
+# Use ultralytics for now
+yolo detect predict \
+model=runs/detect/train8/weights/best.pt \
+source=data/valid/images/IMG_20230720_092528_jpg.rf.980701a2b73a08ffa62ef76bdfb47d6e.jpg
 ```
 
 
