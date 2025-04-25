@@ -1,5 +1,5 @@
 [project.scripts]
-fly = "train:main"
+fly-train = "train:main"
 
 [build-system]
 requires = ["hatchling>=1.11.0"]
