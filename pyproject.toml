@@ -1,0 +1,27 @@
+[project.scripts]
+fly = "train:main"
+
+[build-system]
+requires = ["hatchling>=1.11.0"]
+build-backend = "hatchling.build"
+
+[project]
+requires-python = ">=3.10"
+version = "0.0.1"
+
+name        = "four-leaf-yolo"
+description = "Training YOLO to detect four leaf clovers."
+readme      = ".github/README.md"
+license     = "MIT"
+
+dependencies = [
+  "ultralytics"
+]
+
+
+[tool.hatch.build]
+ignore-vcs = false
+reproducible = true
+directory = "dist"
+sources = ["src"]
+include = ["src/", "LICENSE", "pyproject.toml", ".github/README.md"]
