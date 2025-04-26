@@ -55,6 +55,9 @@ yolo export \
   format=onnx
 ```
 
+## Data Annotation
+- [Label Studio](https://labelstud.io/)
+
 
 ## To Do
 
