@@ -35,7 +35,7 @@ fly-train \
 ```bash
 fly-benchmark \
   --model weights/yolov8n-four-leaf.pt \
-  --dataset data.yaml
+  --data data.yaml
 ```
 
 ### Object Detection
