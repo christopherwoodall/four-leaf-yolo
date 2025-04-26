@@ -55,12 +55,10 @@ yolo export \
   format=onnx
 ```
 
-## Data Annotation
-- [Label Studio](https://labelstud.io/)
-
 
 ## To Do
 
 - [ ] Expand the dataset - see [FLC Dataset](https://biomedicalcomputervision.uniandes.edu.co/publications/finding-four-leaf-clovers-a-benchmark-for-fine-grained-object-localization/).
+- [ ] Annotations - see [Label Studio](https://labelstud.io/) or [Roboflow](https://roboflow.com/).
 - [ ] Convert to ONNX/TensorFlow.
 - [ ] [Serve with `tensorflow.js`](https://github.com/Hyuto/yolov8-tfjs)
