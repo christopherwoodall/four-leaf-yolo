@@ -17,6 +17,11 @@ license     = "MIT"
 
 dependencies = [
   "ultralytics",
+  "onnx>=1.12.0",
+  "onnxslim",
+  "onnxruntime-gpu",
+
+  # Annotations
   "label-studio",
 ]
 
