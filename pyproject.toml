@@ -20,6 +20,10 @@ dependencies = [
   "onnx>=1.12.0",
   "onnxslim",
   "onnxruntime-gpu",
+  "tensorrt>7.0.0,!=10.1.0",
+  "tensorflow>=2.0.0",
+  "paddlepaddle-gpu",
+  "x2paddle",
 
   # Annotations
   "label-studio",
