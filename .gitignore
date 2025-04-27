@@ -1,6 +1,7 @@
 # Project Based
 data/*
 !data/.gitkeep
+!data/custom/*
 
 runs/*
 
