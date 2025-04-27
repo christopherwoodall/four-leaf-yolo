@@ -1,7 +1,8 @@
 # Project Based
-data/*
-!data/.gitkeep
-!data/custom/*
+data/train
+data/test
+data/valid
+data/data.yaml
 
 runs/*
 
