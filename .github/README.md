@@ -53,6 +53,9 @@ yolo export \
   format=onnx
 ```
 
+### Labelling
+After pip installing the project you can run `label-studio start` to label images. Navigate to `http://localhost:8080` and create a new project.
+
 
 ## To Do
 - [ ] Expand the dataset - see [FLC Dataset](https://biomedicalcomputervision.uniandes.edu.co/publications/finding-four-leaf-clovers-a-benchmark-for-fine-grained-object-localization/).
