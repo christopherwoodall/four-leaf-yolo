@@ -1,0 +1,21 @@
+description: Ultralytics YOLOv8n-four-leaf model trained on data.yaml
+author: Ultralytics
+date: '2025-05-02T14:51:52.775119'
+version: 8.3.116
+license: AGPL-3.0 License (https://ultralytics.com/license)
+docs: https://docs.ultralytics.com
+stride: 32
+task: detect
+batch: 1
+imgsz:
+- 640
+- 640
+names:
+  0: clover-3
+  1: clover-4
+args:
+  batch: 1
+  half: false
+  int8: false
+  nms: false
+channels: 3
