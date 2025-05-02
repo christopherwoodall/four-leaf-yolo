@@ -1,0 +1,25 @@
+{
+  "categories": [
+    {
+      "id": 0,
+      "name": "four-leaf-clover"
+    },
+    {
+      "id": 1,
+      "name": "three-leaf-clover"
+    },
+    {
+      "id": 2,
+      "name": "3 leaf clover"
+    },
+    {
+      "id": 3,
+      "name": "4 leaf clover"
+    }
+  ],
+  "info": {
+    "year": 2025,
+    "version": "1.0",
+    "contributor": "Label Studio"
+  }
+}

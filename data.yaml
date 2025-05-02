@@ -3,11 +3,4 @@ val: data/valid/images
 test: data/test/images
 
 nc: 2
-names: ['clover-3', 'clover-4']
-
-roboflow:
-  workspace: adam-fonagy
-  project: hunting-for-four-leaf-clovers
-  version: 20
-  license: CC BY 4.0
-  url: https://universe.roboflow.com/adam-fonagy/hunting-for-four-leaf-clovers/dataset/20
+names: ['three-leaf-clover', 'four-leaf-clover']

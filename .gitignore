@@ -1,7 +1,6 @@
 # Project Based
-data/train
-data/valid
-data/data.yaml
+data/train_old
+data/valid_old
 
 runs/*
 
