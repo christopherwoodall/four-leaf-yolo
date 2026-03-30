@@ -428,11 +428,15 @@
           userAgent: navigator.userAgent
         });
         
-        // Enable debug mode on mobile devices
-        if (isMobile) {
+        // Enable debug mode on mobile devices with ?debug=1 URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        if (isMobile && urlParams.get('debug') === '1') {
           this.debugMode = true;
           document.body.classList.add('mobile-debug');
-          console.log('[MobileOverlay] Debug mode enabled - controls should have colored outlines');
+          console.log('[MobileOverlay] Debug mode enabled - controls have colored outlines');
+          console.log('[MobileOverlay] To disable, remove ?debug=1 from URL');
+        } else if (isMobile) {
+          console.log('[MobileOverlay] Debug mode disabled. Add ?debug=1 to URL to enable colored outlines');
         }
         
         this.initialized = true;
