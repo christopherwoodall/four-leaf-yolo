@@ -32,7 +32,8 @@ paddle = [
   "x2paddle",
 ]
 tensorflow = [
-  "tensorflow==2.10.*",  # last version with native Windows GPU
+  "tensorflow>=2.13",
+  # "tensorflow==2.10.*",  # last version with native Windows GPU
 ]
 
 [tool.hatch.build]
