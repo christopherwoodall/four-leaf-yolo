@@ -8,8 +8,28 @@ Serves the static files with proper MIME types for TensorFlow.js model loading.
 import argparse
 import http.server
 import socketserver
+import socket
 import os
 from pathlib import Path
+
+
+def get_local_ip():
+    """
+    Get the local network IP address.
+
+    Returns:
+        str: Local IP address or 'unknown' if detection fails
+    """
+    try:
+        # Create a socket to find the local IP
+        # Doesn't actually connect, just determines routing
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+        s.close()
+        return local_ip
+    except Exception:
+        return "unknown"
 
 
 def serve_demo(port=8080, directory="docs"):
@@ -48,11 +68,17 @@ def serve_demo(port=8080, directory="docs"):
         return
 
     # Start server
-    with socketserver.TCPServer(("", port), DemoHTTPRequestHandler) as httpd:
+    local_ip = get_local_ip()
+
+    # Allow address reuse to avoid "Address already in use" errors
+    socketserver.TCPServer.allow_reuse_address = True
+
+    with socketserver.TCPServer(("0.0.0.0", port), DemoHTTPRequestHandler) as httpd:
         print(f"🍀 Four-Leaf Clover YOLO Demo Server")
         print(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
         print(f"📂 Serving: {docs_path.absolute()}")
-        print(f"🌐 URL:     http://localhost:{port}")
+        print(f"🌐 Local:   http://localhost:{port}")
+        print(f"📱 Network: http://{local_ip}:{port}")
         print(f"🔌 Press Ctrl+C to stop\n")
 
         try:
