@@ -11,6 +11,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -18,15 +19,9 @@
       overflow: hidden;
       width: 100vw;
       height: 100vh;
-      background: linear-gradient(135deg, #48F90A 0%, #92CC17 25%, #CFD231 50%, #FFB21D 75%, #FF9D97 100%);
-      background-size: 200% 200%;
-      animation: gradientShift 15s ease infinite;
-    }
-
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+      /* Clean dark gradient - professional and minimal */
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d4a2d 50%, #1a1a1a 100%);
+      color-scheme: dark;
     }
 
     #app {
@@ -46,7 +41,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.3);
+      background: #000;
     }
 
     #webcam {
@@ -71,118 +66,116 @@
 
     /* Glassmorphism UI Elements */
     .glass {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     }
 
     /* Stats Overlay */
     #stats {
       position: absolute;
-      top: 20px;
-      left: 20px;
-      padding: 12px 20px;
-      border-radius: 50px;
-      font-size: 14px;
+      top: env(safe-area-inset-top, 16px);
+      left: env(safe-area-inset-left, 16px);
+      padding: 8px 16px;
+      border-radius: 24px;
+      font-size: 13px;
       font-weight: 600;
-      color: white;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-      z-index: 10;
+      color: rgba(255, 255, 255, 0.95);
+      z-index: 20;
       display: none;
     }
 
-    /* Filter Toggle */
-    #filter-toggle {
+    /* Bottom Control Bar */
+    #controls-bar {
       position: absolute;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 14px 32px;
-      border-radius: 50px;
-      font-size: 16px;
-      font-weight: 600;
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      z-index: 10;
+      bottom: env(safe-area-inset-bottom, 0);
+      left: 0;
+      right: 0;
+      padding: 16px env(safe-area-inset-right, 16px) calc(16px + env(safe-area-inset-bottom, 0)) env(safe-area-inset-left, 16px);
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.4) 70%, transparent);
       display: none;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-      min-width: 200px;
-    }
-
-    #filter-toggle.mode-all {
-      background: rgba(72, 249, 10, 0.3);
-      border: 2px solid #48F90A;
-      box-shadow: 0 0 20px rgba(72, 249, 10, 0.5);
-    }
-
-    #filter-toggle.mode-four-leaf {
-      background: rgba(255, 178, 29, 0.3);
-      border: 2px solid #FFB21D;
-      box-shadow: 0 0 20px rgba(255, 178, 29, 0.5);
-    }
-
-    #filter-toggle:hover {
-      transform: translateX(-50%) scale(1.05);
-    }
-
-    #filter-toggle:active {
-      transform: translateX(-50%) scale(0.95);
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      z-index: 20;
     }
 
     /* Switch Camera Button */
     #switch-camera {
-      position: absolute;
-      bottom: 30px;
-      right: 30px;
-      width: 60px;
-      height: 60px;
+      width: 52px;
+      height: 52px;
+      min-width: 52px;
       border-radius: 50%;
-      font-size: 24px;
+      font-size: 22px;
       border: none;
       cursor: pointer;
-      transition: all 0.3s ease;
-      z-index: 10;
-      display: none;
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(10px);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-    }
-
-    #switch-camera:hover {
-      transform: scale(1.1) rotate(180deg);
-      background: rgba(255, 255, 255, 0.3);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      color: white;
+      flex-shrink: 0;
     }
 
     #switch-camera:active {
-      transform: scale(0.9);
+      transform: scale(0.92);
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Filter Toggle */
+    #filter-toggle {
+      flex: 1;
+      max-width: 280px;
+      padding: 14px 24px;
+      border-radius: 28px;
+      font-size: 15px;
+      font-weight: 600;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      white-space: nowrap;
+    }
+
+    #filter-toggle.mode-all {
+      background: rgba(72, 249, 10, 0.25);
+      border: 2px solid rgba(72, 249, 10, 0.7);
+      box-shadow: 0 0 16px rgba(72, 249, 10, 0.3);
+    }
+
+    #filter-toggle.mode-four-leaf {
+      background: rgba(255, 178, 29, 0.25);
+      border: 2px solid rgba(255, 178, 29, 0.7);
+      box-shadow: 0 0 16px rgba(255, 178, 29, 0.3);
+    }
+
+    #filter-toggle:active {
+      transform: scale(0.96);
     }
 
     /* Start Button */
     #start-button {
-      padding: 20px 60px;
-      border-radius: 50px;
-      font-size: 20px;
+      padding: 18px 48px;
+      border-radius: 32px;
+      font-size: 18px;
       font-weight: 700;
       color: white;
       border: none;
       cursor: pointer;
-      transition: all 0.3s ease;
-      z-index: 10;
+      transition: all 0.2s ease;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(10px);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    }
-
-    #start-button:hover:not(:disabled) {
-      transform: scale(1.05);
-      background: rgba(255, 255, 255, 0.25);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+      background: rgba(72, 249, 10, 0.3);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 2px solid rgba(72, 249, 10, 0.6);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 20px rgba(72, 249, 10, 0.2);
     }
 
     #start-button:active:not(:disabled) {
@@ -190,7 +183,7 @@
     }
 
     #start-button:disabled {
-      opacity: 0.6;
+      opacity: 0.5;
       cursor: not-allowed;
     }
 
@@ -205,18 +198,18 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.9);
       z-index: 100;
       color: white;
     }
 
     .spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid rgba(255, 255, 255, 0.3);
-      border-top-color: #FFB21D;
+      width: 48px;
+      height: 48px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      border-top-color: #48F90A;
       border-radius: 50%;
-      animation: spin 1s linear infinite;
+      animation: spin 0.8s linear infinite;
       margin-bottom: 20px;
     }
 
@@ -225,14 +218,14 @@
     }
 
     #loading-text {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 600;
       margin-bottom: 10px;
     }
 
     #loading-progress {
       font-size: 14px;
-      opacity: 0.8;
+      opacity: 0.7;
     }
 
     /* Hidden class */
@@ -243,37 +236,53 @@
     /* Mobile optimizations */
     @media (max-width: 768px) {
       #stats {
-        font-size: 12px;
-        padding: 10px 16px;
-        top: 10px;
-        left: 10px;
+        font-size: 11px;
+        padding: 6px 12px;
+        top: env(safe-area-inset-top, 12px);
+        left: env(safe-area-inset-left, 12px);
       }
 
-      #filter-toggle {
-        bottom: 20px;
-        padding: 12px 24px;
-        font-size: 14px;
-        min-width: 160px;
+      #controls-bar {
+        padding: 12px env(safe-area-inset-right, 12px) calc(12px + env(safe-area-inset-bottom, 0)) env(safe-area-inset-left, 12px);
+        gap: 10px;
       }
 
       #switch-camera {
-        bottom: 20px;
-        right: 20px;
-        width: 50px;
-        height: 50px;
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
         font-size: 20px;
       }
 
+      #filter-toggle {
+        padding: 12px 20px;
+        font-size: 14px;
+        max-width: 240px;
+      }
+
       #start-button {
-        padding: 16px 48px;
-        font-size: 18px;
+        padding: 16px 40px;
+        font-size: 17px;
       }
     }
 
-    /* Ensure text is readable on all devices */
-    @media (prefers-color-scheme: dark) {
-      body {
-        color-scheme: dark;
+    /* Small phones */
+    @media (max-width: 380px) {
+      #controls-bar {
+        gap: 8px;
+      }
+
+      #filter-toggle {
+        font-size: 13px;
+        padding: 10px 16px;
+        max-width: 200px;
+      }
+
+      #switch-camera {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        font-size: 18px;
       }
     }
   </style>
@@ -297,13 +306,11 @@
         <span id="fps">0 FPS</span> | <span id="detections">0 detections</span>
       </div>
 
-      <!-- Filter Toggle -->
-      <button id="filter-toggle" class="glass mode-all">
-        🍀 Show All Clovers
-      </button>
-
-      <!-- Switch Camera Button -->
-      <button id="switch-camera" class="glass">🔄</button>
+      <!-- Bottom Control Bar -->
+      <div id="controls-bar">
+        <button id="switch-camera">🔄</button>
+        <button id="filter-toggle" class="mode-all">🍀 Show All Clovers</button>
+      </div>
 
       <!-- Start Button -->
       <button id="start-button">🍀 Start Camera</button>
@@ -352,7 +359,8 @@
       fpsDisplay: document.getElementById('fps'),
       detectionsDisplay: document.getElementById('detections'),
       filterToggle: document.getElementById('filter-toggle'),
-      switchCamera: document.getElementById('switch-camera')
+      switchCamera: document.getElementById('switch-camera'),
+      controlsBar: document.getElementById('controls-bar')
     };
 
     // Utility: Color palette for classes
@@ -436,8 +444,7 @@
         // Show UI elements
         elements.startButton.classList.add('hidden');
         elements.stats.style.display = 'block';
-        elements.filterToggle.style.display = 'block';
-        elements.switchCamera.style.display = 'block';
+        elements.controlsBar.style.display = 'flex';
 
         // Start detection
         isRunning = true;
