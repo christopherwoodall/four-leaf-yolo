@@ -320,7 +320,7 @@
     const CLASS_NAMES = ['Three-Leaf', 'Four-Leaf'];
     const COLORS = ['#48F90A', '#FFB21D']; // Green for 3-leaf, Gold for 4-leaf
     const NMS_IOU_THRESHOLD = 0.45;
-    const NMS_SCORE_THRESHOLD = 0.2;
+    const NMS_SCORE_THRESHOLD = 0.3;
     const MAX_BOXES = 500;
 
     // State
@@ -335,6 +335,10 @@
     let frameCount = 0;
     let lastTime = performance.now();
     let fps = 0;
+    
+    // Canvas size tracking for optimization
+    let lastVideoWidth = 0;
+    let lastVideoHeight = 0;
 
     // DOM Elements
     const elements = {
@@ -495,7 +499,7 @@
     }
 
     // Post-process Model Output
-    async function postProcess(output, xRatio, yRatio) {
+    async function postProcess(output) {
       return tf.tidy(() => {
         // Transpose: [1, 7, 8400] -> [1, 8400, 7]
         const transposed = output.transpose([0, 2, 1]);
@@ -548,7 +552,7 @@
     }
 
     // Render Boxes
-    function renderBoxes(boxesData, scoresData, classesData, xRatio, yRatio) {
+    function renderBoxes(boxesData, scoresData, classesData) {
       const ctx = elements.canvas.getContext('2d');
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
@@ -560,6 +564,12 @@
       ctx.font = `${fontSize}px Arial`;
       ctx.textBaseline = 'top';
 
+      // Calculate scale factor for coordinates
+      // Model outputs coords in 640×640 space, we need them in video space
+      const video = elements.webcam;
+      const maxSize = Math.max(video.videoWidth, video.videoHeight);
+      const scaleFactor = maxSize / INPUT_SIZE;
+
       let visibleDetections = 0;
 
       for (let i = 0; i < scoresData.length; i++) {
@@ -570,22 +580,36 @@
           continue;
         }
 
-        visibleDetections++;
-
         const className = CLASS_NAMES[classIndex];
         const color = colors.get(classIndex);
         const score = (scoresData[i] * 100).toFixed(1);
 
         let [y1, x1, y2, x2] = boxesData[i];
         
-        // Scale coordinates back to original video size
-        x1 *= xRatio;
-        x2 *= xRatio;
-        y1 *= yRatio;
-        y2 *= yRatio;
+        // Scale from model space (640×640) to video space
+        x1 *= scaleFactor;
+        x2 *= scaleFactor;
+        y1 *= scaleFactor;
+        y2 *= scaleFactor;
+        
+        // Filter out boxes outside video bounds (in padding area)
+        if (x1 >= video.videoWidth || y1 >= video.videoHeight) {
+          continue;
+        }
+        
+        // Clip boxes to video bounds
+        x2 = Math.min(x2, video.videoWidth);
+        y2 = Math.min(y2, video.videoHeight);
         
         const width = x2 - x1;
         const height = y2 - y1;
+        
+        // Skip invalid boxes
+        if (width <= 0 || height <= 0) {
+          continue;
+        }
+
+        visibleDetections++;
 
         // Draw box background
         ctx.fillStyle = Colors.hexToRgba(color, 0.2);
@@ -624,13 +648,20 @@
       const video = elements.webcam;
       const canvas = elements.canvas;
       
-      // Set canvas size to match video's actual size
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      // Position canvas to match video's display size
-      canvas.style.width = video.offsetWidth + 'px';
-      canvas.style.height = video.offsetHeight + 'px';
+      // Only update if video size has changed (performance optimization)
+      if (video.videoWidth !== lastVideoWidth || video.videoHeight !== lastVideoHeight) {
+        // Set canvas size to match video's actual size
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Position canvas to match video's display size
+        canvas.style.width = video.offsetWidth + 'px';
+        canvas.style.height = video.offsetHeight + 'px';
+        
+        // Update tracking variables
+        lastVideoWidth = video.videoWidth;
+        lastVideoHeight = video.videoHeight;
+      }
     }
 
     // Main Detection Loop
@@ -651,13 +682,13 @@
         const output = await model.executeAsync(input);
         
         // Post-process
-        const { boxes, scores, classes } = await postProcess(output, xRatio, yRatio);
+        const { boxes, scores, classes } = await postProcess(output);
         
         // Apply NMS
         const { boxesData, scoresData, classesData } = await applyNMS(boxes, scores, classes);
         
         // Render
-        renderBoxes(boxesData, scoresData, classesData, xRatio, yRatio);
+        renderBoxes(boxesData, scoresData, classesData);
         
         // Cleanup
         tf.dispose([input, output, boxes, scores, classes]);
