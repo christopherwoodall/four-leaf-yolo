@@ -89,17 +89,25 @@
 
     /* Bottom Control Bar */
     #controls-bar {
-      position: absolute;
-      bottom: env(safe-area-inset-bottom, 0);
+      position: fixed;
+      bottom: 0;
       left: 0;
       right: 0;
-      padding: 16px env(safe-area-inset-right, 16px) calc(16px + env(safe-area-inset-bottom, 0)) env(safe-area-inset-left, 16px);
+      padding: 16px 16px 16px 16px;
       background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.4) 70%, transparent);
       display: none;
       align-items: center;
       justify-content: center;
       gap: 12px;
       z-index: 20;
+    }
+
+    /* iOS safe area support - only apply env() on supporting browsers */
+    @supports (padding: env(safe-area-inset-bottom)) {
+      #controls-bar {
+        bottom: env(safe-area-inset-bottom, 0);
+        padding: 16px env(safe-area-inset-right, 16px) calc(16px + env(safe-area-inset-bottom, 0)) env(safe-area-inset-left, 16px);
+      }
     }
 
     /* Switch Camera Button */
@@ -243,8 +251,21 @@
       }
 
       #controls-bar {
-        padding: 12px env(safe-area-inset-right, 12px) calc(12px + env(safe-area-inset-bottom, 0)) env(safe-area-inset-left, 12px);
+        position: fixed !important;
+        bottom: 0 !important;
+        padding: 12px 12px 12px 12px !important;
         gap: 10px;
+        display: none !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+
+      /* iOS safe area support for mobile */
+      @supports (padding: env(safe-area-inset-bottom)) {
+        #controls-bar {
+          padding: 12px env(safe-area-inset-right, 12px) calc(12px + env(safe-area-inset-bottom, 0)) env(safe-area-inset-left, 12px) !important;
+        }
       }
 
       #switch-camera {
@@ -284,6 +305,22 @@
         min-width: 44px;
         font-size: 18px;
       }
+    }
+
+    /* Debug mode - colored outlines for visual confirmation on mobile */
+    body.mobile-debug #controls-bar {
+      outline: 3px solid red !important;
+      outline-offset: -3px;
+    }
+
+    body.mobile-debug #filter-toggle {
+      outline: 3px solid yellow !important;
+      outline-offset: -3px;
+    }
+
+    body.mobile-debug #switch-camera {
+      outline: 3px solid cyan !important;
+      outline-offset: -3px;
     }
   </style>
 </head>
@@ -329,6 +366,169 @@
     const NMS_IOU_THRESHOLD = 0.45;
     const NMS_SCORE_THRESHOLD = 0.3;
     const MAX_BOXES = 500;
+
+    // ========== MOBILE DETECTION & OVERLAY SYSTEM ==========
+    
+    /**
+     * Mobile device and feature detection utility
+     */
+    const MobileDetector = {
+      isAndroid() {
+        return /Android/i.test(navigator.userAgent);
+      },
+      
+      isIOS() {
+        return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+      },
+      
+      isMobile() {
+        return this.isAndroid() || this.isIOS() || window.innerWidth <= 768;
+      },
+      
+      supportsEnvVariables() {
+        // Test if browser supports CSS env() variables
+        const testDiv = document.createElement('div');
+        testDiv.style.padding = 'env(safe-area-inset-bottom, 0px)';
+        return testDiv.style.padding !== '';
+      },
+      
+      getViewport() {
+        return {
+          width: window.innerWidth,
+          height: window.innerHeight,
+          orientation: window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'
+        };
+      },
+      
+      log(message, ...args) {
+        if (this.isMobile()) {
+          console.log(`[MobileDetector] ${message}`, ...args);
+        }
+      }
+    };
+
+    /**
+     * Mobile overlay manager - forces controls to be visible on Android
+     */
+    const MobileOverlay = {
+      initialized: false,
+      debugMode: false,
+      
+      init() {
+        if (this.initialized) return;
+        
+        const isMobile = MobileDetector.isMobile();
+        const isAndroid = MobileDetector.isAndroid();
+        const viewport = MobileDetector.getViewport();
+        
+        console.log('[MobileOverlay] Initializing...', {
+          isMobile,
+          isAndroid,
+          viewport,
+          userAgent: navigator.userAgent
+        });
+        
+        // Enable debug mode on mobile devices
+        if (isMobile) {
+          this.debugMode = true;
+          document.body.classList.add('mobile-debug');
+          console.log('[MobileOverlay] Debug mode enabled - controls should have colored outlines');
+        }
+        
+        this.initialized = true;
+      },
+      
+      forceControlsVisible() {
+        const controlsBar = document.getElementById('controls-bar');
+        const filterToggle = document.getElementById('filter-toggle');
+        const switchCamera = document.getElementById('switch-camera');
+        
+        if (!controlsBar) {
+          console.error('[MobileOverlay] controls-bar element not found!');
+          return;
+        }
+        
+        console.log('[MobileOverlay] Forcing controls visible...');
+        
+        // Force display to flex
+        controlsBar.style.setProperty('display', 'flex', 'important');
+        
+        // Force positioning - use simple values for Android
+        if (MobileDetector.isAndroid()) {
+          console.log('[MobileOverlay] Applying Android-specific positioning');
+          controlsBar.style.setProperty('position', 'fixed', 'important');
+          controlsBar.style.setProperty('bottom', '0px', 'important');
+          controlsBar.style.setProperty('left', '0px', 'important');
+          controlsBar.style.setProperty('right', '0px', 'important');
+          controlsBar.style.setProperty('padding', '12px', 'important');
+        }
+        
+        // Force flexbox properties
+        controlsBar.style.setProperty('flex-direction', 'row', 'important');
+        controlsBar.style.setProperty('align-items', 'center', 'important');
+        controlsBar.style.setProperty('justify-content', 'center', 'important');
+        controlsBar.style.setProperty('gap', '10px', 'important');
+        controlsBar.style.setProperty('z-index', '20', 'important');
+        
+        // Force layout recalculation
+        void controlsBar.offsetHeight;
+        
+        // Get computed styles for debugging
+        const computed = window.getComputedStyle(controlsBar);
+        console.log('[MobileOverlay] Controls bar computed styles:', {
+          display: computed.display,
+          position: computed.position,
+          bottom: computed.bottom,
+          left: computed.left,
+          right: computed.right,
+          width: computed.width,
+          height: computed.height,
+          visibility: computed.visibility,
+          opacity: computed.opacity,
+          zIndex: computed.zIndex
+        });
+        
+        // Check child elements
+        if (filterToggle && switchCamera) {
+          console.log('[MobileOverlay] Child elements found:', {
+            filterToggle: {
+              display: window.getComputedStyle(filterToggle).display,
+              width: window.getComputedStyle(filterToggle).width
+            },
+            switchCamera: {
+              display: window.getComputedStyle(switchCamera).display,
+              width: window.getComputedStyle(switchCamera).width
+            }
+          });
+        }
+        
+        console.log('[MobileOverlay] Force complete. Controls should now be visible.');
+      },
+      
+      handleOrientationChange() {
+        console.log('[MobileOverlay] Orientation changed:', MobileDetector.getViewport());
+        // Re-apply forced visibility after orientation change
+        if (MobileDetector.isMobile()) {
+          setTimeout(() => this.forceControlsVisible(), 100);
+        }
+      },
+      
+      handleResize() {
+        // Debounced resize handler
+        if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
+        this.resizeTimeout = setTimeout(() => {
+          console.log('[MobileOverlay] Resize detected:', MobileDetector.getViewport());
+          if (MobileDetector.isMobile()) {
+            this.forceControlsVisible();
+          }
+        }, 250);
+      }
+    };
+
+    // Initialize mobile overlay system
+    MobileOverlay.init();
+    
+    // ========== END MOBILE SYSTEM ==========
 
     // State
     let model = null;
@@ -445,6 +645,12 @@
         elements.startButton.classList.add('hidden');
         elements.stats.style.display = 'block';
         elements.controlsBar.style.display = 'flex';
+
+        // Force controls visible on mobile devices
+        if (MobileDetector.isMobile()) {
+          console.log('[startCamera] Mobile device detected, forcing controls visible');
+          MobileOverlay.forceControlsVisible();
+        }
 
         // Start detection
         isRunning = true;
@@ -725,6 +931,10 @@
 
     // Handle window resize
     window.addEventListener('resize', syncCanvasSize);
+
+    // Mobile overlay event listeners
+    window.addEventListener('orientationchange', () => MobileOverlay.handleOrientationChange());
+    window.addEventListener('resize', () => MobileOverlay.handleResize());
 
     // Initialize
     loadModel();
