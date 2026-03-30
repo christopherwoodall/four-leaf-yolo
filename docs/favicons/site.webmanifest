@@ -1,0 +1,20 @@
+{
+  "name": "Four-Leaf Clover Detector",
+  "short_name": "Clover Detector",
+  "icons": [
+    {
+      "src": "/four-leaf-yolo/favicons/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/four-leaf-yolo/favicons/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#1a1a1a",
+  "background_color": "#1a1a1a",
+  "display": "standalone",
+  "description": "Real-time four-leaf clover detection using YOLOv8 and TensorFlow.js"
+}
