@@ -1,6 +1,7 @@
 [project.scripts]
 fly-train = "train:main"
 fly-benchmark = "benchmark:main"
+fly-serve-demo = "serve_demo:main"
 
 [build-system]
 requires = ["hatchling>=1.11.0"]
@@ -33,7 +34,6 @@ paddle = [
 ]
 tensorflow = [
   "tensorflow>=2.13",
-  # "tensorflow==2.10.*",  # last version with native Windows GPU
 ]
 
 [tool.hatch.build]
