@@ -17,6 +17,8 @@ You will need to grab the dataset from Adam on Roboflow [here](https://universe.
 uv venv
 . .venv/bin/activate
 uv pip install -e .
+# uv pip install -e ".[paddle]"
+# uv pip install -e ".[tensorflow]"
 ```
 
 ### Training
