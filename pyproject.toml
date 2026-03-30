@@ -7,7 +7,7 @@ requires = ["hatchling>=1.11.0"]
 build-backend = "hatchling.build"
 
 [project]
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.13"
 version = "0.0.1"
 
 name        = "four-leaf-yolo"
@@ -20,15 +20,20 @@ dependencies = [
   "onnx>=1.12.0",
   "onnxslim",
   "onnxruntime-gpu",
-  "tensorrt>7.0.0,!=10.1.0",
-  "tensorflow>=2.0.0",
-  "paddlepaddle-gpu",
-  "x2paddle",
+  "tensorrt-cu12",
 
   # Annotations
   "label-studio",
 ]
 
+[project.optional-dependencies]
+paddle = [
+  "paddlepaddle-gpu",
+  "x2paddle",
+]
+tensorflow = [
+  "tensorflow==2.10.*",  # last version with native Windows GPU
+]
 
 [tool.hatch.build]
 ignore-vcs = false
