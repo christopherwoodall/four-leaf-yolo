@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Real-time four-leaf clover detection using YOLOv8 and TensorFlow.js">
+  <title>Four-Leaf Clover Detector | YOLOv8</title>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(135deg, #48F90A 0%, #92CC17 25%, #CFD231 50%, #FFB21D 75%, #FF9D97 100%);
+      background-size: 200% 200%;
+      animation: gradientShift 15s ease infinite;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    #app {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Video and Canvas Container */
+    #video-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    #webcam {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+
+    #canvas {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    /* Glassmorphism UI Elements */
+    .glass {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    }
+
+    /* Stats Overlay */
+    #stats {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      z-index: 10;
+      display: none;
+    }
+
+    /* Filter Toggle */
+    #filter-toggle {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 600;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 10;
+      display: none;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      min-width: 200px;
+    }
+
+    #filter-toggle.mode-all {
+      background: rgba(72, 249, 10, 0.3);
+      border: 2px solid #48F90A;
+      box-shadow: 0 0 20px rgba(72, 249, 10, 0.5);
+    }
+
+    #filter-toggle.mode-four-leaf {
+      background: rgba(255, 178, 29, 0.3);
+      border: 2px solid #FFB21D;
+      box-shadow: 0 0 20px rgba(255, 178, 29, 0.5);
+    }
+
+    #filter-toggle:hover {
+      transform: translateX(-50%) scale(1.05);
+    }
+
+    #filter-toggle:active {
+      transform: translateX(-50%) scale(0.95);
+    }
+
+    /* Switch Camera Button */
+    #switch-camera {
+      position: absolute;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      font-size: 24px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 10;
+      display: none;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    #switch-camera:hover {
+      transform: scale(1.1) rotate(180deg);
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    #switch-camera:active {
+      transform: scale(0.9);
+    }
+
+    /* Start Button */
+    #start-button {
+      padding: 20px 60px;
+      border-radius: 50px;
+      font-size: 20px;
+      font-weight: 700;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 10;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    #start-button:hover:not(:disabled) {
+      transform: scale(1.05);
+      background: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    #start-button:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+
+    #start-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Loading Overlay */
+    #loading {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 100;
+      color: white;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #FFB21D;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    #loading-text {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    #loading-progress {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    /* Hidden class */
+    .hidden {
+      display: none !important;
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+      #stats {
+        font-size: 12px;
+        padding: 10px 16px;
+        top: 10px;
+        left: 10px;
+      }
+
+      #filter-toggle {
+        bottom: 20px;
+        padding: 12px 24px;
+        font-size: 14px;
+        min-width: 160px;
+      }
+
+      #switch-camera {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+      }
+
+      #start-button {
+        padding: 16px 48px;
+        font-size: 18px;
+      }
+    }
+
+    /* Ensure text is readable on all devices */
+    @media (prefers-color-scheme: dark) {
+      body {
+        color-scheme: dark;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Loading Overlay -->
+    <div id="loading">
+      <div class="spinner"></div>
+      <div id="loading-text">Loading YOLOv8 Model...</div>
+      <div id="loading-progress">0%</div>
+    </div>
+
+    <!-- Video Container -->
+    <div id="video-container">
+      <video id="webcam" autoplay playsinline muted></video>
+      <canvas id="canvas"></canvas>
+      
+      <!-- Stats Overlay -->
+      <div id="stats" class="glass">
+        <span id="fps">0 FPS</span> | <span id="detections">0 detections</span>
+      </div>
+
+      <!-- Filter Toggle -->
+      <button id="filter-toggle" class="glass mode-all">
+        🍀 Show All Clovers
+      </button>
+
+      <!-- Switch Camera Button -->
+      <button id="switch-camera" class="glass">🔄</button>
+
+      <!-- Start Button -->
+      <button id="start-button">🍀 Start Camera</button>
+    </div>
+  </div>
+
+  <!-- TensorFlow.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0"></script>
+
+  <script type="module">
+    // Constants
+    const MODEL_PATH = './model/model.json';
+    const INPUT_SIZE = 640;
+    const CLASS_NAMES = ['Three-Leaf', 'Four-Leaf'];
+    const COLORS = ['#48F90A', '#FFB21D']; // Green for 3-leaf, Gold for 4-leaf
+    const NMS_IOU_THRESHOLD = 0.45;
+    const NMS_SCORE_THRESHOLD = 0.2;
+    const MAX_BOXES = 500;
+
+    // State
+    let model = null;
+    let webcamStream = null;
+    let animationId = null;
+    let filterMode = 'all'; // 'all' or 'four-leaf-only'
+    let facingMode = 'environment'; // 'user' or 'environment'
+    let isRunning = false;
+
+    // Performance tracking
+    let frameCount = 0;
+    let lastTime = performance.now();
+    let fps = 0;
+
+    // DOM Elements
+    const elements = {
+      loading: document.getElementById('loading'),
+      loadingText: document.getElementById('loading-text'),
+      loadingProgress: document.getElementById('loading-progress'),
+      startButton: document.getElementById('start-button'),
+      webcam: document.getElementById('webcam'),
+      canvas: document.getElementById('canvas'),
+      stats: document.getElementById('stats'),
+      fpsDisplay: document.getElementById('fps'),
+      detectionsDisplay: document.getElementById('detections'),
+      filterToggle: document.getElementById('filter-toggle'),
+      switchCamera: document.getElementById('switch-camera')
+    };
+
+    // Utility: Color palette for classes
+    class Colors {
+      constructor() {
+        this.palette = COLORS;
+      }
+      
+      get(i) {
+        return this.palette[Math.floor(i) % this.palette.length];
+      }
+      
+      static hexToRgba(hex, alpha) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result
+          ? `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${alpha})`
+          : null;
+      }
+    }
+
+    const colors = new Colors();
+
+    // Load Model
+    async function loadModel() {
+      try {
+        elements.loadingText.textContent = 'Loading YOLOv8 Model...';
+        elements.loadingProgress.textContent = '0%';
+        
+        model = await tf.loadGraphModel(MODEL_PATH, {
+          onProgress: (fraction) => {
+            const percent = Math.round(fraction * 100);
+            elements.loadingProgress.textContent = `${percent}%`;
+          }
+        });
+
+        elements.loadingText.textContent = 'Model Loaded!';
+        elements.loadingProgress.textContent = '100%';
+        
+        // Warm up the model
+        const dummyInput = tf.zeros([1, INPUT_SIZE, INPUT_SIZE, 3]);
+        await model.executeAsync(dummyInput);
+        tf.dispose(dummyInput);
+        
+        elements.loading.classList.add('hidden');
+        console.log('Model loaded successfully');
+      } catch (error) {
+        console.error('Error loading model:', error);
+        elements.loadingText.textContent = 'Error loading model';
+        elements.loadingProgress.textContent = error.message;
+      }
+    }
+
+    // Start Camera
+    async function startCamera() {
+      try {
+        // Stop existing stream if any
+        if (webcamStream) {
+          webcamStream.getTracks().forEach(track => track.stop());
+        }
+
+        const constraints = {
+          video: {
+            facingMode: facingMode,
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        };
+
+        webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
+        elements.webcam.srcObject = webcamStream;
+        
+        // Wait for video to be ready
+        await new Promise((resolve) => {
+          elements.webcam.onloadedmetadata = () => {
+            elements.webcam.play();
+            resolve();
+          };
+        });
+
+        // Show UI elements
+        elements.startButton.classList.add('hidden');
+        elements.stats.style.display = 'block';
+        elements.filterToggle.style.display = 'block';
+        elements.switchCamera.style.display = 'block';
+
+        // Start detection
+        isRunning = true;
+        detectFrame();
+        
+        console.log('Camera started');
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+        alert('Unable to access camera. Please grant camera permissions and try again.');
+      }
+    }
+
+    // Switch Camera
+    async function switchCamera() {
+      facingMode = facingMode === 'user' ? 'environment' : 'user';
+      await startCamera();
+    }
+
+    // Toggle Filter Mode
+    function toggleFilter() {
+      if (filterMode === 'all') {
+        filterMode = 'four-leaf-only';
+        elements.filterToggle.textContent = '✨ Four-Leaf Only';
+        elements.filterToggle.classList.remove('mode-all');
+        elements.filterToggle.classList.add('mode-four-leaf');
+      } else {
+        filterMode = 'all';
+        elements.filterToggle.textContent = '🍀 Show All Clovers';
+        elements.filterToggle.classList.remove('mode-four-leaf');
+        elements.filterToggle.classList.add('mode-all');
+      }
+    }
+
+    // Preprocess Image
+    function preprocessImage(videoElement) {
+      return tf.tidy(() => {
+        const img = tf.browser.fromPixels(videoElement);
+        
+        // Pad to square
+        const [h, w] = img.shape.slice(0, 2);
+        const maxSize = Math.max(w, h);
+        const imgPadded = img.pad([
+          [0, maxSize - h],
+          [0, maxSize - w],
+          [0, 0]
+        ]);
+
+        // Resize and normalize
+        const resized = tf.image.resizeBilinear(imgPadded, [INPUT_SIZE, INPUT_SIZE]);
+        const normalized = resized.div(255.0);
+        const batched = normalized.expandDims(0);
+        
+        return {
+          input: batched,
+          xRatio: maxSize / w,
+          yRatio: maxSize / h
+        };
+      });
+    }
+
+    // Post-process Model Output
+    async function postProcess(output, xRatio, yRatio) {
+      return tf.tidy(() => {
+        // Transpose: [1, 7, 8400] -> [1, 8400, 7]
+        const transposed = output.transpose([0, 2, 1]);
+        
+        // Extract boxes [cx, cy, w, h] and convert to [y1, x1, y2, x2]
+        const boxes = tf.tidy(() => {
+          const w = transposed.slice([0, 0, 2], [-1, -1, 1]);
+          const h = transposed.slice([0, 0, 3], [-1, -1, 1]);
+          const cx = transposed.slice([0, 0, 0], [-1, -1, 1]);
+          const cy = transposed.slice([0, 0, 1], [-1, -1, 1]);
+          
+          const x1 = tf.sub(cx, tf.div(w, 2));
+          const y1 = tf.sub(cy, tf.div(h, 2));
+          const x2 = tf.add(x1, w);
+          const y2 = tf.add(y1, h);
+          
+          return tf.concat([y1, x1, y2, x2], 2).squeeze();
+        });
+
+        // Extract scores and classes
+        const rawScores = transposed.slice([0, 0, 4], [-1, -1, CLASS_NAMES.length]).squeeze(0);
+        const scores = rawScores.max(1);
+        const classes = rawScores.argMax(1);
+
+        return { boxes, scores, classes };
+      });
+    }
+
+    // Apply NMS
+    async function applyNMS(boxes, scores, classes) {
+      const nmsIndices = await tf.image.nonMaxSuppressionAsync(
+        boxes,
+        scores,
+        MAX_BOXES,
+        NMS_IOU_THRESHOLD,
+        NMS_SCORE_THRESHOLD
+      );
+
+      const selectedBoxes = boxes.gather(nmsIndices);
+      const selectedScores = scores.gather(nmsIndices);
+      const selectedClasses = classes.gather(nmsIndices);
+
+      const boxesData = await selectedBoxes.array();
+      const scoresData = await selectedScores.array();
+      const classesData = await selectedClasses.array();
+
+      tf.dispose([nmsIndices, selectedBoxes, selectedScores, selectedClasses]);
+
+      return { boxesData, scoresData, classesData };
+    }
+
+    // Render Boxes
+    function renderBoxes(boxesData, scoresData, classesData, xRatio, yRatio) {
+      const ctx = elements.canvas.getContext('2d');
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+      // Calculate font size
+      const fontSize = Math.max(
+        Math.round(Math.max(ctx.canvas.width, ctx.canvas.height) / 40),
+        14
+      );
+      ctx.font = `${fontSize}px Arial`;
+      ctx.textBaseline = 'top';
+
+      let visibleDetections = 0;
+
+      for (let i = 0; i < scoresData.length; i++) {
+        const classIndex = classesData[i];
+        
+        // Apply filter
+        if (filterMode === 'four-leaf-only' && classIndex !== 1) {
+          continue;
+        }
+
+        visibleDetections++;
+
+        const className = CLASS_NAMES[classIndex];
+        const color = colors.get(classIndex);
+        const score = (scoresData[i] * 100).toFixed(1);
+
+        let [y1, x1, y2, x2] = boxesData[i];
+        
+        // Scale coordinates back to original video size
+        x1 *= xRatio;
+        x2 *= xRatio;
+        y1 *= yRatio;
+        y2 *= yRatio;
+        
+        const width = x2 - x1;
+        const height = y2 - y1;
+
+        // Draw box background
+        ctx.fillStyle = Colors.hexToRgba(color, 0.2);
+        ctx.fillRect(x1, y1, width, height);
+
+        // Draw border
+        ctx.strokeStyle = color;
+        ctx.lineWidth = Math.max(Math.min(ctx.canvas.width, ctx.canvas.height) / 200, 2.5);
+        ctx.strokeRect(x1, y1, width, height);
+
+        // Draw label background
+        ctx.fillStyle = color;
+        const label = `${className} - ${score}%`;
+        const textWidth = ctx.measureText(label).width;
+        const textHeight = fontSize;
+        const yText = y1 - (textHeight + ctx.lineWidth);
+        
+        ctx.fillRect(
+          x1 - 1,
+          yText < 0 ? 0 : yText,
+          textWidth + ctx.lineWidth,
+          textHeight + ctx.lineWidth
+        );
+
+        // Draw label text
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(label, x1 - 1, yText < 0 ? 0 : yText);
+      }
+
+      // Update detections count
+      elements.detectionsDisplay.textContent = `${visibleDetections} detection${visibleDetections !== 1 ? 's' : ''}`;
+    }
+
+    // Sync Canvas Size with Video
+    function syncCanvasSize() {
+      const video = elements.webcam;
+      const canvas = elements.canvas;
+      
+      // Set canvas size to match video's actual size
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      // Position canvas to match video's display size
+      canvas.style.width = video.offsetWidth + 'px';
+      canvas.style.height = video.offsetHeight + 'px';
+    }
+
+    // Main Detection Loop
+    async function detectFrame() {
+      if (!isRunning) return;
+
+      const startTime = performance.now();
+
+      try {
+        await tf.nextFrame();
+
+        // Sync canvas size
+        syncCanvasSize();
+
+        const { input, xRatio, yRatio } = preprocessImage(elements.webcam);
+        
+        // Run inference
+        const output = await model.executeAsync(input);
+        
+        // Post-process
+        const { boxes, scores, classes } = await postProcess(output, xRatio, yRatio);
+        
+        // Apply NMS
+        const { boxesData, scoresData, classesData } = await applyNMS(boxes, scores, classes);
+        
+        // Render
+        renderBoxes(boxesData, scoresData, classesData, xRatio, yRatio);
+        
+        // Cleanup
+        tf.dispose([input, output, boxes, scores, classes]);
+
+        // Update FPS
+        frameCount++;
+        const currentTime = performance.now();
+        if (currentTime - lastTime >= 1000) {
+          fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+          elements.fpsDisplay.textContent = `${fps} FPS`;
+          frameCount = 0;
+          lastTime = currentTime;
+        }
+
+      } catch (error) {
+        console.error('Detection error:', error);
+      }
+
+      // Continue loop
+      animationId = requestAnimationFrame(detectFrame);
+    }
+
+    // Event Listeners
+    elements.startButton.addEventListener('click', startCamera);
+    elements.switchCamera.addEventListener('click', switchCamera);
+    elements.filterToggle.addEventListener('click', toggleFilter);
+
+    // Handle window resize
+    window.addEventListener('resize', syncCanvasSize);
+
+    // Initialize
+    loadModel();
+  </script>
+</body>
+</html>
