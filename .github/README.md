@@ -14,9 +14,9 @@ You will need to grab the dataset from Adam on Roboflow [here](https://universe.
 
 ### Installation
 ```bash
-venv .venv
-source .venv/bin/activate
-pip install -e .
+uv venv
+. .venv/bin/activate
+uv pip install -e .
 ```
 
 ### Training
